@@ -55,3 +55,19 @@ Output via `gl_FragColor`. Required preamble is injected automatically:
 ## Adding shaders
 
 Drop any `.glsl` file into `shaders/`. It will appear in the sidebar immediately (no restart needed).
+
+## Deploying to recurBOY
+
+The recurBOY expects `.frag` files in its `PATTERN` directory. The build step copies shaders from `shaders/` into `build/`, renaming `.glsl` to `.frag`:
+
+```
+make build
+```
+
+To build and deploy to a recurBOY connected via USB:
+
+```
+make deploy
+```
+
+This scps all `.frag` files to `pi@raspberrypi.local:PATTERN/` in a single transfer. Edit the Makefile if your host or path differs.

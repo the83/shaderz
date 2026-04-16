@@ -1,5 +1,11 @@
 run:
 	npm start
 
-deploy:
-	scp shaders/*.glsl pi@raspberrypi.local:PATTERN/
+build:
+	@rm -rf build && mkdir build
+	@for f in shaders/*.glsl; do \
+		cp "$$f" build/$$(basename "$$f" .glsl).frag; \
+	done
+
+deploy: build
+	scp build/*.frag pi@raspberrypi.local:PATTERN/
