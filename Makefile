@@ -1,3 +1,5 @@
+.PHONY: run build deploy
+
 run:
 	npm start
 
@@ -11,3 +13,4 @@ build:
 
 deploy: build
 	scp build/*.frag pi@raspberrypi.local:PATTERN/
+	ssh pi@raspberrypi.local 'sync'

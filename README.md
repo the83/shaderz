@@ -70,4 +70,12 @@ To build and deploy to a recurBOY connected via USB:
 make deploy
 ```
 
-This scps all `.frag` files to `pi@raspberrypi.local:PATTERN/` in a single transfer. Edit the Makefile if your host or path differs.
+This scps all `.frag` files to `pi@raspberrypi.local:PATTERN/` and runs `sync` to flush writes to the SD card (important — the Pi loses power on unplug, so unsynced files will be lost). Edit the Makefile if your host or path differs.
+
+To avoid entering the Pi's password on every deploy, copy your SSH key:
+
+```
+ssh-copy-id pi@raspberrypi.local
+```
+
+**Note:** The recurBOY's GLSL ES compiler does not support `bool`, `inout`, or `break`. The `_lite` shader variants are simplified for the Pi's GPU (shorter loops, no unsupported features).
