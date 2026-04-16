@@ -58,7 +58,7 @@ Drop any `.glsl` file into `shaders/`. It will appear in the sidebar immediately
 
 ## Deploying to recurBOY
 
-The recurBOY expects `.frag` files in its `PATTERN` directory. The build step copies shaders from `shaders/` into `build/`, renaming `.glsl` to `.frag`:
+The recurBOY uses a different uniform interface (`tres`, `fparams`, `ftime`/`itime`) and expects `.frag` files. The build step handles both: it prepends `recurboy_header.glsl` (which declares recurBOY's uniforms and aliases them to our `u_time`/`u_resolution`/`u_x0`–`u_x3` names), strips our uniform declarations, and renames `.glsl` to `.frag`.
 
 ```
 make build
