@@ -246,5 +246,8 @@ void main() {
         color = mix(color, cfCol, clamp(floorPerp / 18.0, 0.0, 1.0));
     }
 
+    // CRT scanlines (vertical since screen is rotated)
+    color *= mod(gl_FragCoord.x, 2.0) < 1.0 ? 0.82 : 1.0;
+
     gl_FragColor = vec4(color, 1.0);
 }

@@ -244,5 +244,9 @@ void main() {
     vec3 ink   = PLERP(ink0,ink1,ink2,ink3);
     vec3 paper = PLERP(pap0,pap1,pap2,pap3);
 
-    gl_FragColor = vec4(mix(ink, paper, bit), 1.0);
+    // CRT scanlines
+    vec3 out_color = mix(ink, paper, bit);
+    out_color *= mod(gl_FragCoord.y, 2.0) < 1.0 ? 0.82 : 1.0;
+
+    gl_FragColor = vec4(out_color, 1.0);
 }
