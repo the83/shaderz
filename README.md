@@ -42,12 +42,15 @@ Output via `gl_FragColor`. Required preamble is injected automatically:
 | File | Description |
 |---|---|
 | `horiz_ballblazer.glsl` | Ballblazer-style arena — checkered floor, random objects, 4 color palettes |
-| `horiz_bitblazer.glsl` | Ballblazer with 1-bit Bayer dithering and ink/paper color pairs |
-| `horiz_wetblazer.glsl` | Ballblazer with animated water surface and Fresnel reflections |
-| `vert_ballblazer.glsl` | `horiz_ballblazer` rotated 90° (floor on right) |
-| `vert_bitblazer.glsl` | `horiz_bitblazer` rotated 90° |
-| `vert_wetblazer.glsl` | `horiz_wetblazer` rotated 90° |
-| `phantasy.glsl` | Phantasy Star–style dungeon raycaster with branching maze |
+| `horiz_ballblazer_bit.glsl` | Ballblazer with 1-bit Bayer dithering and ink/paper color pairs |
+| `horiz_ballblazer_wet.glsl` | Ballblazer with animated water surface and Fresnel reflections |
+| `horiz_phantasy.glsl` | Phantasy Star–style dungeon raycaster with brick-textured walls/floor/ceiling |
+| `horiz_phantasy_bit.glsl` | Phantasy dungeon with 1-bit Bayer dithering and ink/paper color pairs |
+| `vert_ballblazer.glsl` | `horiz_ballblazer` rotated 90° |
+| `vert_ballblazer_bit.glsl` | `horiz_ballblazer_bit` rotated 90° |
+| `vert_ballblazer_wet.glsl` | `horiz_ballblazer_wet` rotated 90° |
+| `vert_phantasy.glsl` | `horiz_phantasy` rotated 90° |
+| `vert_phantasy_bit.glsl` | `horiz_phantasy_bit` rotated 90° |
 
 ## Adding shaders
 
