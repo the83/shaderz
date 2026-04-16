@@ -1,0 +1,54 @@
+# shaderz
+
+A local GLSL shader sandbox for developing [recurBOY](https://github.com/cyberboy666/recurBOY) shaders.
+
+Serves a WebGL preview in the browser with hot reload on file save. No in-browser editor — write shaders in your editor of choice and see them update live.
+
+## Usage
+
+```
+make run
+```
+
+Then open [http://localhost:3000](http://localhost:3000).
+
+## Interface
+
+- **Sidebar** — click any `.glsl` file to load it
+- **Sliders** — control `u_x0`–`u_x3` in real time
+- **Status bar** — shows compile errors; previous shader keeps running on error
+- **Hot reload** — any file saved in `shaders/` reloads automatically
+
+## Shader uniforms
+
+All shaders receive the standard recurBOY uniform interface:
+
+| Uniform | Type | Description |
+|---|---|---|
+| `u_time` | `float` | elapsed seconds |
+| `u_resolution` | `vec2` | canvas dimensions |
+| `u_x0`–`u_x3` | `float` | user params, 0.0–1.0 |
+
+Output via `gl_FragColor`. Required preamble is injected automatically:
+
+```glsl
+#ifdef GL_ES
+  precision mediump float;
+#endif
+```
+
+## Shaders
+
+| File | Description |
+|---|---|
+| `horiz_ballblazer.glsl` | Ballblazer-style arena — checkered floor, random objects, 4 color palettes |
+| `horiz_bitblazer.glsl` | Ballblazer with 1-bit Bayer dithering and ink/paper color pairs |
+| `horiz_wetblazer.glsl` | Ballblazer with animated water surface and Fresnel reflections |
+| `vert_ballblazer.glsl` | `horiz_ballblazer` rotated 90° (floor on right) |
+| `vert_bitblazer.glsl` | `horiz_bitblazer` rotated 90° |
+| `vert_wetblazer.glsl` | `horiz_wetblazer` rotated 90° |
+| `phantasy.glsl` | Phantasy Star–style dungeon raycaster with branching maze |
+
+## Adding shaders
+
+Drop any `.glsl` file into `shaders/`. It will appear in the sidebar immediately (no restart needed).

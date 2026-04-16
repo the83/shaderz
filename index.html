@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>shaderz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    color: #ccc;
+    font-family: monospace;
+    font-size: 13px;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    width: 200px;
+    min-width: 200px;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #333;
+  }
+
+  #sidebar h2 {
+    padding: 12px;
+    font-size: 14px;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    letter-spacing: 0.05em;
+  }
+
+  #shader-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+  }
+
+  .shader-item {
+    padding: 7px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #aaa;
+    border-left: 3px solid transparent;
+  }
+
+  .shader-item:hover { background: #222; color: #eee; }
+  .shader-item.active {
+    background: #222;
+    color: #fff;
+    border-left-color: #5af;
+  }
+
+  #params {
+    padding: 10px 12px;
+    border-top: 1px solid #333;
+  }
+
+  #params h3 {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .param-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .param-row label {
+    width: 28px;
+    color: #888;
+    font-size: 11px;
+  }
+
+  .param-row input[type=range] {
+    flex: 1;
+    accent-color: #5af;
+    cursor: pointer;
+  }
+
+  .param-row .val {
+    width: 32px;
+    text-align: right;
+    color: #aaa;
+    font-size: 11px;
+  }
+
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #canvas-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: pixelated;
+  }
+
+  #statusbar {
+    height: 26px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 12px;
+    font-size: 11px;
+  }
+
+  #status-file { color: #5af; }
+  #status-msg { color: #f85; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #status-msg.ok { color: #5c5; }
+  #status-reload { color: #888; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>shaderz</h2>
+  <div id="shader-list"></div>
+  <div id="params">
+    <h3>params</h3>
+    <div class="param-row">
+      <label>u_x0</label>
+      <input type="range" id="p0" min="0" max="1" step="0.01" value="0.5">
+      <span class="val" id="v0">0.50</span>
+    </div>
+    <div class="param-row">
+      <label>u_x1</label>
+      <input type="range" id="p1" min="0" max="1" step="0.01" value="0.5">
+      <span class="val" id="v1">0.50</span>
+    </div>
+    <div class="param-row">
+      <label>u_x2</label>
+      <input type="range" id="p2" min="0" max="1" step="0.01" value="0.5">
+      <span class="val" id="v2">0.50</span>
+    </div>
+    <div class="param-row">
+      <label>u_x3</label>
+      <input type="range" id="p3" min="0" max="1" step="0.01" value="0.5">
+      <span class="val" id="v3">0.50</span>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="canvas-wrap">
+    <canvas id="glcanvas"></canvas>
+  </div>
+  <div id="statusbar">
+    <span id="status-file">no shader loaded</span>
+    <span id="status-msg"></span>
+    <span id="status-reload"></span>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('glcanvas');
+const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+if (!gl) { document.getElementById('status-msg').textContent = 'WebGL not supported'; }
+
+// SD 4:3 aspect, but displayed at a reasonable size
+const W = 640, H = 480;
+canvas.width = W;
+canvas.height = H;
+
+// --- Shader boilerplate ---
+const VERT_SRC = `
+attribute vec2 a_position;
+void main() {
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}
+`;
+
+const FRAG_PREAMBLE = `
+#ifdef GL_ES
+  precision mediump float;
+#endif
+`;
+
+// Fullscreen quad
+const quadBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  -1, -1,  1, -1,  -1, 1,
+  -1,  1,  1, -1,   1, 1,
+]), gl.STATIC_DRAW);
+
+let currentProgram = null;
+let fallbackProgram = null;
+let startTime = performance.now();
+
+function compileShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    const err = gl.getShaderInfoLog(s);
+    gl.deleteShader(s);
+    throw new Error(err);
+  }
+  return s;
+}
+
+function linkProgram(vertSrc, fragSrc) {
+  const vert = compileShader(gl.VERTEX_SHADER, vertSrc);
+  const frag = compileShader(gl.FRAGMENT_SHADER, fragSrc);
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vert);
+  gl.attachShader(prog, frag);
+  gl.linkProgram(prog);
+  gl.deleteShader(vert);
+  gl.deleteShader(frag);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    const err = gl.getProgramInfoLog(prog);
+    gl.deleteProgram(prog);
+    throw new Error(err);
+  }
+  return prog;
+}
+
+// Build fallback (solid black) program
+try {
+  fallbackProgram = linkProgram(VERT_SRC, `
+    #ifdef GL_ES
+      precision mediump float;
+    #endif
+    void main() { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); }
+  `);
+} catch(e) { console.error('fallback shader failed', e); }
+
+function setStatus(file, msg, isOk) {
+  document.getElementById('status-file').textContent = file || 'no shader loaded';
+  const el = document.getElementById('status-msg');
+  el.textContent = msg || '';
+  el.className = isOk ? 'ok' : (msg ? '' : '');
+}
+
+function loadShaderProgram(src) {
+  const fragSrc = FRAG_PREAMBLE + '\n' + src;
+  return linkProgram(VERT_SRC, fragSrc);
+}
+
+// Params
+const params = [0.5, 0.5, 0.5, 0.5];
+for (let i = 0; i < 4; i++) {
+  const slider = document.getElementById('p' + i);
+  const val = document.getElementById('v' + i);
+  slider.addEventListener('input', () => {
+    params[i] = parseFloat(slider.value);
+    val.textContent = params[i].toFixed(2);
+  });
+}
+
+// Render loop
+let animId = null;
+function render() {
+  animId = requestAnimationFrame(render);
+  const prog = currentProgram || fallbackProgram;
+  if (!prog) return;
+
+  gl.useProgram(prog);
+  gl.viewport(0, 0, W, H);
+
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+  const t = (performance.now() - startTime) / 1000;
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes  = gl.getUniformLocation(prog, 'u_resolution');
+  const uX    = [0,1,2,3].map(i => gl.getUniformLocation(prog, 'u_x' + i));
+
+  if (uTime) gl.uniform1f(uTime, t);
+  if (uRes)  gl.uniform2f(uRes, W, H);
+  uX.forEach((loc, i) => { if (loc) gl.uniform1f(loc, params[i]); });
+
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+render();
+
+// --- Shader file management ---
+let currentFile = null;
+
+async function loadShader(name) {
+  const res = await fetch('/shaders/' + encodeURIComponent(name));
+  if (!res.ok) throw new Error('fetch failed: ' + res.status);
+  return res.text();
+}
+
+async function selectShader(name) {
+  try {
+    const src = await loadShader(name);
+    const prog = loadShaderProgram(src);
+    if (currentProgram) gl.deleteProgram(currentProgram);
+    currentProgram = prog;
+    currentFile = name;
+    setStatus(name, 'ok', true);
+    highlightActive(name);
+  } catch(e) {
+    const msg = e.message.replace(/\n/g, ' ').trim();
+    setStatus(name, msg, false);
+    // keep previous program running
+  }
+}
+
+function highlightActive(name) {
+  document.querySelectorAll('.shader-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.name === name);
+  });
+}
+
+async function refreshList() {
+  const res = await fetch('/shaders');
+  const files = await res.json();
+  const list = document.getElementById('shader-list');
+  list.innerHTML = '';
+  files.forEach(name => {
+    const el = document.createElement('div');
+    el.className = 'shader-item';
+    el.dataset.name = name;
+    el.textContent = name;
+    if (name === currentFile) el.classList.add('active');
+    el.addEventListener('click', () => selectShader(name));
+    list.appendChild(el);
+  });
+}
+
+// Initial load
+refreshList().then(() => {
+  // Auto-load first shader if present
+  const first = document.querySelector('.shader-item');
+  if (first) selectShader(first.dataset.name);
+});
+
+// --- SSE hot reload ---
+const evtSource = new EventSource('/watch');
+evtSource.onmessage = async (e) => {
+  const { file, event } = JSON.parse(e.data);
+  const reloadEl = document.getElementById('status-reload');
+  reloadEl.textContent = 'reloaded ' + new Date().toLocaleTimeString();
+  await refreshList();
+  if (file === currentFile) {
+    await selectShader(file);
+  }
+};
+evtSource.onerror = () => {
+  document.getElementById('status-reload').textContent = 'watch disconnected';
+};
+</script>
+</body>
+</html>

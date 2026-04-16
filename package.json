@@ -1,0 +1,7 @@
+{
+  "name": "shaderz",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
