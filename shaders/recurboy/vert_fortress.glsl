@@ -4,7 +4,7 @@
 //
 // u_x0: pattern mode (0..1 sweeps 6 logic combinator modes)
 // u_x1: LFO frequency
-// u_x2: color palette (8 palettes)
+// u_x2: color palette (16 palettes)
 // u_x3: animation speed / phase scroll
 
 uniform float u_time;
@@ -58,7 +58,7 @@ float sub3(float a, float b) {
 
 vec3 pal(float val, float sel) {
     float idx = floor(val * 7.0 + 0.5);
-    float p = floor(sel * 7.99);
+    float p = floor(sel * 15.99);
 
     vec3 col;
 
@@ -78,18 +78,56 @@ vec3 pal(float val, float sel) {
         float v = idx / 7.0;
         col = vec3(v * 0.2, v, v * 0.3);
     } else if (p < 5.0) {
+        float r = 0.2 + idx / 9.0;
+        float g = max(0.0, (idx - 4.0) / 6.0);
+        float bl = max(0.0, 0.8 - idx / 10.0);
+        col = vec3(r, g, bl);
+    } else if (p < 6.0) {
+        col = vec3(1.0 - gbit(val, 2.0), 1.0 - gbit(val, 0.0), 1.0 - gbit(val, 1.0));
+    } else if (p < 7.0) {
         float v = idx / 7.0;
         col = vec3(v, v * 0.6, v * 0.1);
-    } else if (p < 6.0) {
+    } else if (p < 8.0) {
+        col = vec3(
+            gbit(val, 0.0) * 0.9 + gbit(val, 2.0) * 0.1,
+            gbit(val, 1.0) * 0.9 + gbit(val, 2.0) * 0.1,
+            gbit(val, 2.0)
+        );
+    } else if (p < 9.0) {
+        float r = smoothstep(2.0, 5.0, idx);
+        float g = smoothstep(5.0, 7.0, idx);
+        float bl = smoothstep(0.0, 3.0, idx) - smoothstep(5.0, 7.0, idx);
+        col = vec3(r, g, bl);
+    } else if (p < 10.0) {
+        float r = max(0.0, (idx - 5.0) / 3.0);
+        float g = smoothstep(1.0, 6.0, idx);
+        float bl = 0.15 + idx / 9.0;
+        col = vec3(r, g, bl);
+    } else if (p < 11.0) {
+        float v = idx / 7.0;
+        col = vec3(v * 0.5, 0.2 + v * 0.6, v * 0.25);
+    } else if (p < 12.0) {
         float v = idx / 7.0;
         col = vec3(v);
-    } else if (p < 7.0) {
-        float r = min((idx + 1.0) / 4.0, 1.0);
-        float g = max(0.0, (idx - 4.0) / 4.0) * 0.8;
-        float bl = max(0.0, 1.0 - idx / 3.0) * 0.6;
+    } else if (p < 13.0) {
+        float r = smoothstep(0.0, 3.0, idx) - smoothstep(4.0, 6.0, idx) + smoothstep(6.0, 7.0, idx);
+        float g = smoothstep(3.0, 6.0, idx);
+        float bl = smoothstep(1.0, 4.0, idx);
         col = vec3(r, g, bl);
+    } else if (p < 14.0) {
+        float r = smoothstep(1.0, 4.0, idx);
+        float g = smoothstep(4.0, 7.0, idx) * 0.8;
+        float bl = smoothstep(0.0, 2.0, idx) - smoothstep(3.0, 6.0, idx);
+        col = vec3(r, g, bl);
+    } else if (p < 15.0) {
+        float v = idx / 7.0;
+        col = vec3(0.15 + v * 0.7, 0.1 + v * 0.55, 0.05 + v * 0.35);
     } else {
-        col = vec3(1.0 - gbit(val, 2.0), 1.0 - gbit(val, 0.0), 1.0 - gbit(val, 1.0));
+        col = vec3(
+            0.4 + gbit(val, 0.0) * 0.4 + gbit(val, 2.0) * 0.2,
+            0.4 + gbit(val, 1.0) * 0.4 + gbit(val, 0.0) * 0.2,
+            0.4 + gbit(val, 2.0) * 0.4 + gbit(val, 1.0) * 0.2
+        );
     }
 
     return floor(col * 7.0 + 0.5) / 7.0;
