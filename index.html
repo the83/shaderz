@@ -168,8 +168,8 @@
     </div>
     <div class="param-row">
       <label>u_x3</label>
-      <input type="range" id="p3" min="0" max="1" step="0.01" value="0.5">
-      <span class="val" id="v3">0.50</span>
+      <input type="range" id="p3" min="-1" max="1" step="0.01" value="0">
+      <span class="val" id="v3">0.00</span>
     </div>
   </div>
 </div>
@@ -273,7 +273,7 @@ function loadShaderProgram(src) {
 }
 
 // Params
-const params = [0.5, 0.5, 0.5, 0.5];
+const params = [0.5, 0.5, 0.5, 0];
 for (let i = 0; i < 4; i++) {
   const slider = document.getElementById('p' + i);
   const val = document.getElementById('v' + i);
