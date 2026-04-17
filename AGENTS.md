@@ -23,6 +23,10 @@ uniform vec2 u_resolution;
 uniform float u_x0, u_x1, u_x2, u_x3;  // params 0.0-1.0
 ```
 
+- `u_x3` is the **speed/animation knob** — always assign speed to this param
+- In the sandbox, `u_x3` is bipolar (-1.0 to 1.0); on the recurBOY hardware, `fparams` is **0.0 to 1.0**
+- For `_lite` shaders, always add a base offset to speed so animation runs even when the knob is at minimum (e.g. `float speed = 0.3 + u_x3 * 1.5;` not `float speed = u_x3 * 1.5;`)
+
 - `horiz_` prefix: standard landscape orientation
 - `vert_` prefix: rotated 90 degrees (UV swapped, aspect inverted, scanlines on x instead of y)
 - `_bit` suffix: 1-bit Bayer dithered variant with ink/paper color pairs

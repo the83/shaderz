@@ -114,7 +114,7 @@ vec3 pal(float val, float sel) {
 void main(void) {
     vec2 uv = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y) / u_resolution;
 
-    float speed = u_x3 * 1.5;
+    float speed = 0.3 + u_x3 * 1.5;
     float t = u_time * speed;
 
     // LFO — spatial, varies across screen

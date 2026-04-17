@@ -99,7 +99,7 @@ void main(void) {
     vec2 rawUV = vec2(gl_FragCoord.x, u_resolution.y - gl_FragCoord.y) / u_resolution;
     vec2 uv = vec2(rawUV.y, 1.0 - rawUV.x);
 
-    float speed = u_x3 * 1.5;
+    float speed = 0.3 + u_x3 * 1.5;
     float t = u_time * speed;
 
     float lfoFreq = mix(0.02, 1.0, u_x1 * u_x1);

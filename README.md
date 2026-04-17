@@ -50,6 +50,7 @@ Shaders are organized into two directories:
 | `horiz_ballblazer_wet.glsl` | Ballblazer with animated water surface and Fresnel reflections |
 | `horiz_phantasy.glsl` | Phantasy Star–style dungeon raycaster with brick-textured walls/floor/ceiling |
 | `horiz_phantasy_bit.glsl` | Phantasy dungeon with 1-bit Bayer dithering and ink/paper color pairs |
+| `horiz_fortress.glsl` | LZX Fortress clone — 3-bit digital pattern generator with 8 logic combinator modes and 16 color palettes |
 | `vert_*` | Rotated 90° versions of the above |
 
 ### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
@@ -60,6 +61,7 @@ Shaders are organized into two directories:
 | `horiz_ballblazer_bit_lite.glsl` | Ballblazer lite with 1-bit dithering |
 | `horiz_phantasy_lite.glsl` | Dungeon raycaster with fake navigation |
 | `horiz_phantasy_bit_lite.glsl` | Phantasy lite with 1-bit dithering |
+| `horiz_fortress_lite.glsl` | LZX Fortress clone — 6 logic modes, 8 color palettes, FM + cross-modulation |
 | `vert_*` | Rotated 90° versions of the above |
 
 ## Adding shaders
