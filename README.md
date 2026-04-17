@@ -52,7 +52,9 @@ Shaders are organized into two directories:
 | `horiz_phantasy_bit.glsl` | Phantasy dungeon with 1-bit Bayer dithering and ink/paper color pairs |
 | `horiz_fortress.glsl` | LZX Fortress clone — 3-bit digital pattern generator with 8 logic combinator modes and 16 color palettes |
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation control, colored faces, analytical ray-box intersection |
-| `vert_*` | Rotated 90° versions of the above |
+| `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
+| `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
+| `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
 
@@ -62,10 +64,11 @@ Shaders are organized into two directories:
 | `horiz_ballblazer_bit.glsl` | Ballblazer with 1-bit dithering |
 | `horiz_phantasy.glsl` | Dungeon raycaster with fake navigation |
 | `horiz_phantasy_bit.glsl` | Phantasy with 1-bit dithering |
-| `horiz_fortress.glsl` | LZX Fortress clone — 6 logic modes, 8 color palettes, FM + cross-modulation |
+| `horiz_fortress.glsl` | LZX Fortress clone — 16 color palettes, 6 logic modes, FM + cross-modulation |
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation, analytical intersection, no loops |
 | `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
-| `vert_*` | Rotated 90° versions of the above |
+| `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
+| `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ## Adding shaders
 
