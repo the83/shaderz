@@ -54,6 +54,7 @@ Shaders are organized into two directories:
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation control, colored faces, analytical ray-box intersection |
 | `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
 | `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
+| `horiz_color_noise.glsl` | Chromatic noise — independent RGB channels with color fringing and VHS-style interference |
 | `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
@@ -68,6 +69,7 @@ Shaders are organized into two directories:
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation, analytical intersection, no loops |
 | `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
 | `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
+| `horiz_color_noise.glsl` | Chromatic noise — independent RGB channels with color fringing |
 | `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ## Adding shaders
