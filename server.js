@@ -4,25 +4,28 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SHADERS_DIR = path.join(__dirname, 'shaders');
+const SHADER_DIRS = ['shaders/sandbox', 'shaders/recurboy'];
 const PORT = 3000;
 
 // SSE clients
 const clients = new Set();
 
-// Ensure shaders directory exists
-if (!fs.existsSync(SHADERS_DIR)) {
-  fs.mkdirSync(SHADERS_DIR);
+// Ensure shader directories exist
+for (const dir of SHADER_DIRS) {
+  const full = path.join(__dirname, dir);
+  if (!fs.existsSync(full)) fs.mkdirSync(full, { recursive: true });
 }
 
-// Watch shaders directory for changes
-fs.watch(SHADERS_DIR, (event, filename) => {
-  if (!filename || !filename.endsWith('.glsl')) return;
-  const msg = `data: ${JSON.stringify({ event, file: filename })}\n\n`;
-  for (const res of clients) {
-    res.write(msg);
-  }
-});
+// Watch both shader directories for changes
+for (const dir of SHADER_DIRS) {
+  fs.watch(path.join(__dirname, dir), (event, filename) => {
+    if (!filename || !filename.endsWith('.glsl')) return;
+    const msg = `data: ${JSON.stringify({ event, file: filename, dir })}\n\n`;
+    for (const res of clients) {
+      res.write(msg);
+    }
+  });
+}
 
 const MIME = {
   '.html': 'text/html',
@@ -49,29 +52,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // List shaders
+  // List shaders (grouped by directory)
   if (pathname === '/shaders') {
-    let files;
-    try {
-      files = fs.readdirSync(SHADERS_DIR).filter(f => f.endsWith('.glsl')).sort();
-    } catch {
-      files = [];
+    const result = {};
+    for (const dir of SHADER_DIRS) {
+      const label = path.basename(dir);
+      try {
+        result[label] = fs.readdirSync(path.join(__dirname, dir))
+          .filter(f => f.endsWith('.glsl')).sort();
+      } catch {
+        result[label] = [];
+      }
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(files));
+    res.end(JSON.stringify(result));
     return;
   }
 
-  // Serve a shader file
+  // Serve a shader file from either directory
   if (pathname.startsWith('/shaders/')) {
-    const name = path.basename(pathname);
-    if (!name.endsWith('.glsl')) {
+    const parts = pathname.slice('/shaders/'.length).split('/');
+    if (parts.length !== 2 || !parts[1].endsWith('.glsl')) {
       res.writeHead(400);
       res.end('Bad request');
       return;
     }
-    const filePath = path.join(SHADERS_DIR, name);
-    if (!filePath.startsWith(SHADERS_DIR)) {
+    const filePath = path.join(__dirname, 'shaders', parts[0], parts[1]);
+    if (!filePath.startsWith(path.join(__dirname, 'shaders'))) {
       res.writeHead(403);
       res.end('Forbidden');
       return;

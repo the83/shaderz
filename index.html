@@ -48,6 +48,16 @@
     border-left: 3px solid transparent;
   }
 
+  .shader-group {
+    padding: 8px 12px 4px;
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-top: 1px solid #333;
+  }
+  .shader-group:first-child { border-top: none; }
+
   .shader-item:hover { background: #222; color: #eee; }
   .shader-item.active {
     background: #222;
@@ -304,66 +314,75 @@ render();
 // --- Shader file management ---
 let currentFile = null;
 
-async function loadShader(name) {
-  const res = await fetch('/shaders/' + encodeURIComponent(name));
+async function loadShader(dir, name) {
+  const res = await fetch('/shaders/' + encodeURIComponent(dir) + '/' + encodeURIComponent(name));
   if (!res.ok) throw new Error('fetch failed: ' + res.status);
   return res.text();
 }
 
-async function selectShader(name) {
+let currentDir = null;
+
+async function selectShader(dir, name) {
   try {
-    const src = await loadShader(name);
+    const src = await loadShader(dir, name);
     const prog = loadShaderProgram(src);
     if (currentProgram) gl.deleteProgram(currentProgram);
     currentProgram = prog;
     currentFile = name;
+    currentDir = dir;
     setStatus(name, 'ok', true);
-    highlightActive(name);
+    highlightActive(dir, name);
   } catch(e) {
     const msg = e.message.replace(/\n/g, ' ').trim();
     setStatus(name, msg, false);
-    // keep previous program running
   }
 }
 
-function highlightActive(name) {
+function highlightActive(dir, name) {
   document.querySelectorAll('.shader-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.name === name);
+    el.classList.toggle('active', el.dataset.dir === dir && el.dataset.name === name);
   });
 }
 
 async function refreshList() {
   const res = await fetch('/shaders');
-  const files = await res.json();
+  const groups = await res.json();
   const list = document.getElementById('shader-list');
   list.innerHTML = '';
-  files.forEach(name => {
-    const el = document.createElement('div');
-    el.className = 'shader-item';
-    el.dataset.name = name;
-    el.textContent = name;
-    if (name === currentFile) el.classList.add('active');
-    el.addEventListener('click', () => selectShader(name));
-    list.appendChild(el);
-  });
+  for (const [dir, files] of Object.entries(groups)) {
+    const header = document.createElement('div');
+    header.className = 'shader-group';
+    header.textContent = dir;
+    list.appendChild(header);
+    files.forEach(name => {
+      const el = document.createElement('div');
+      el.className = 'shader-item';
+      el.dataset.dir = dir;
+      el.dataset.name = name;
+      el.textContent = name;
+      if (dir === currentDir && name === currentFile) el.classList.add('active');
+      el.addEventListener('click', () => selectShader(dir, name));
+      list.appendChild(el);
+    });
+  }
 }
 
 // Initial load
 refreshList().then(() => {
-  // Auto-load first shader if present
   const first = document.querySelector('.shader-item');
-  if (first) selectShader(first.dataset.name);
+  if (first) selectShader(first.dataset.dir, first.dataset.name);
 });
 
 // --- SSE hot reload ---
 const evtSource = new EventSource('/watch');
 evtSource.onmessage = async (e) => {
-  const { file, event } = JSON.parse(e.data);
+  const { file, dir, event } = JSON.parse(e.data);
   const reloadEl = document.getElementById('status-reload');
   reloadEl.textContent = 'reloaded ' + new Date().toLocaleTimeString();
   await refreshList();
-  if (file === currentFile) {
-    await selectShader(file);
+  const dirLabel = dir.split('/').pop();
+  if (file === currentFile && dirLabel === currentDir) {
+    await selectShader(dirLabel, file);
   }
 };
 evtSource.onerror = () => {

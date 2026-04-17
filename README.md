@@ -37,7 +37,11 @@ Output via `gl_FragColor`. Required preamble is injected automatically:
 #endif
 ```
 
-## Shaders
+## Shader directories
+
+Shaders are organized into two directories:
+
+### `shaders/sandbox/` — full-featured shaders for desktop WebGL
 
 | File | Description |
 |---|---|
@@ -46,19 +50,25 @@ Output via `gl_FragColor`. Required preamble is injected automatically:
 | `horiz_ballblazer_wet.glsl` | Ballblazer with animated water surface and Fresnel reflections |
 | `horiz_phantasy.glsl` | Phantasy Star–style dungeon raycaster with brick-textured walls/floor/ceiling |
 | `horiz_phantasy_bit.glsl` | Phantasy dungeon with 1-bit Bayer dithering and ink/paper color pairs |
-| `vert_ballblazer.glsl` | `horiz_ballblazer` rotated 90° |
-| `vert_ballblazer_bit.glsl` | `horiz_ballblazer_bit` rotated 90° |
-| `vert_ballblazer_wet.glsl` | `horiz_ballblazer_wet` rotated 90° |
-| `vert_phantasy.glsl` | `horiz_phantasy` rotated 90° |
-| `vert_phantasy_bit.glsl` | `horiz_phantasy_bit` rotated 90° |
+| `vert_*` | Rotated 90° versions of the above |
+
+### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
+
+| File | Description |
+|---|---|
+| `horiz_ballblazer_lite.glsl` | Checkered floor, sky, 4 spheres, camera sway |
+| `horiz_ballblazer_bit_lite.glsl` | Ballblazer lite with 1-bit dithering |
+| `horiz_phantasy_lite.glsl` | Dungeon raycaster with fake navigation |
+| `horiz_phantasy_bit_lite.glsl` | Phantasy lite with 1-bit dithering |
+| `vert_*` | Rotated 90° versions of the above |
 
 ## Adding shaders
 
-Drop any `.glsl` file into `shaders/`. It will appear in the sidebar immediately (no restart needed).
+Drop any `.glsl` file into either `shaders/sandbox/` or `shaders/recurboy/`. It will appear in the sidebar immediately (no restart needed).
 
 ## Deploying to recurBOY
 
-The recurBOY uses a different uniform interface (`tres`, `fparams`, `ftime`/`itime`) and expects `.frag` files. The build step handles both: it prepends `recurboy_header.glsl` (which declares recurBOY's uniforms and aliases them to our `u_time`/`u_resolution`/`u_x0`–`u_x3` names), strips our uniform declarations, and renames `.glsl` to `.frag`.
+The recurBOY uses a different uniform interface (`tres`, `fparams`, `ftime`/`itime`) and expects `.frag` files. The build step processes only `shaders/recurboy/*.glsl`: it prepends `recurboy_header.glsl` (which aliases recurBOY uniforms to our names via `#define`), strips our uniform declarations, and renames `.glsl` to `.frag`.
 
 ```
 make build
@@ -70,7 +80,7 @@ To build and deploy to a recurBOY connected via USB:
 make deploy
 ```
 
-This scps all `.frag` files to `pi@raspberrypi.local:PATTERN/` and runs `sync` to flush writes to the SD card (important — the Pi loses power on unplug, so unsynced files will be lost). Edit the Makefile if your host or path differs.
+This wipes the Pi's `PATTERN/` directory, scps all built `.frag` files, and runs `sync` to flush writes to the SD card (important — the Pi loses power on unplug, so unsynced files will be lost). Edit the Makefile if your host or path differs.
 
 To avoid entering the Pi's password on every deploy, copy your SSH key:
 
