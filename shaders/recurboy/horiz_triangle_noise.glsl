@@ -1,8 +1,8 @@
-// Palette noise — layered noise with color palettes for recurBOY
-// Three independent noise layers with priority-based compositing
+// Triangle noise — diagonal layered noise with color palettes for recurBOY
+// Each layer samples through a rotated grid (0°, 60°, -60°)
 //
-// u_x0: horizontal coherence (0 = per-pixel static, 1 = horizontal bands)
-// u_x1: vertical coherence (0 = per-pixel static, 1 = vertical columns)
+// u_x0: cell size (0 = fine, 1 = large)
+// u_x1: rotation drift (0 = fixed angles, 1 = slowly rotating)
 // u_x2: color palette (8 palettes)
 // u_x3: speed / animation rate
 
@@ -19,11 +19,24 @@ float hash(vec2 p) {
     return fract((p3.x + p3.y) * p3.z);
 }
 
-// Compute all 3 layer colors at once (one palette branch evaluation)
-// Stores into globals to avoid calling palette 3x
-vec3 g_c0; // highest priority (palette index 6)
-vec3 g_c1; // mid priority (palette index 4)
-vec3 g_c2; // lowest priority (palette index 2)
+vec2 rot2(vec2 p, float a) {
+    float c = cos(a), s = sin(a);
+    return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float chNoise(vec2 uv, float cells, float f0, float fb, float tOff, float angle) {
+    vec2 ruv = rot2(uv - 0.5, angle) + 0.5;
+    float cx = floor(ruv.x * cells);
+    float cy = floor(ruv.y * cells);
+    float n0 = hash(vec2(cx, cy) + (f0 + tOff) * 7.31);
+    float n1 = hash(vec2(cx, cy) + (f0 + tOff + 1.0) * 7.31);
+    return mix(n0, n1, fb);
+}
+
+// Pre-baked palette colors (one branch, 3 colors out)
+vec3 g_c0;
+vec3 g_c1;
+vec3 g_c2;
 
 void calcColors(float sel) {
     float p = floor(sel * 7.99);
@@ -81,34 +94,27 @@ void main(void) {
     float f0 = floor(frame);
     float fb = fract(frame);
 
-    float xC = mix(u_resolution.x, 3.0, u_x0 * u_x0);
-    float yC = mix(u_resolution.y, 3.0, u_x1 * u_x1);
+    float cells = mix(u_resolution.y, 4.0, u_x0 * u_x0);
 
-    // Single-layer noise per channel (lighter than two-layer)
-    float cx0 = floor(uv.x * xC);
-    float cy0 = floor(uv.y * yC);
-    float n0 = mix(hash(vec2(cx0, cy0) + f0 * 7.31), hash(vec2(cx0, cy0) + (f0 + 1.0) * 7.31), fb);
+    float drift = u_x1 * t * 0.15;
+    float a0 = 0.0 + drift;
+    float a1 = 1.047 + drift * 0.7;
+    float a2 = -1.047 + drift * 1.3;
 
-    float cx1 = floor(uv.x * xC * 1.07);
-    float cy1 = floor(uv.y * yC * 1.07);
-    float n1 = mix(hash(vec2(cx1, cy1) + (f0 + 31.0) * 7.31), hash(vec2(cx1, cy1) + (f0 + 32.0) * 7.31), fb);
+    float n0 = chNoise(uv, cells, f0, fb, 0.0,  a0);
+    float n1 = chNoise(uv, cells, f0, fb, 31.0, a1);
+    float n2 = chNoise(uv, cells, f0, fb, 67.0, a2);
 
-    float cx2 = floor(uv.x * xC * 0.93);
-    float cy2 = floor(uv.y * yC * 0.93);
-    float n2 = mix(hash(vec2(cx2, cy2) + (f0 + 67.0) * 7.31), hash(vec2(cx2, cy2) + (f0 + 68.0) * 7.31), fb);
+    float hit0 = step(0.5, n0);
+    float hit1 = step(0.5, n1);
+    float hit2 = step(0.5, n2);
 
-    float a0 = step(0.5, n0);
-    float a1 = step(0.5, n1);
-    float a2 = step(0.5, n2);
-
-    // Compute palette colors once
     calcColors(u_x2);
 
-    // Priority compositing: g_c0 > g_c1 > g_c2
     vec3 col = vec3(0.0);
-    col = mix(col, g_c2, a2);
-    col = mix(col, g_c1, a1);
-    col = mix(col, g_c0, a0);
+    col = mix(col, g_c2, hit2);
+    col = mix(col, g_c1, hit1);
+    col = mix(col, g_c0, hit0);
 
     gl_FragColor = vec4(col, 1.0);
 }

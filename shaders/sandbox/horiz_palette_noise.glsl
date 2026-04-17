@@ -40,59 +40,95 @@ float channelNoise(vec2 uv, float xCells, float yCells, float f0, float fBlend, 
     return noise * 0.6 + mix(m0, m1, fBlend) * 0.4;
 }
 
-// --- Fortress palette (3-bit value → RGB) ---
+// Pre-baked color triples per palette (16 palettes)
+vec3 g_c0; // highest priority
+vec3 g_c1; // mid priority
+vec3 g_c2; // lowest priority
 
-float bit(float val, float n) {
-    float v = floor(val * 7.0 + 0.5);
-    return mod(floor(v / (n < 0.5 ? 1.0 : n < 1.5 ? 2.0 : 4.0)), 2.0);
-}
-
-vec3 palette(float val, float sel) {
-    float idx = floor(val * 7.0 + 0.5);
+void calcColors(float sel) {
     float p = floor(sel * 15.99);
 
-    vec3 col;
-
     if (p < 1.0) {
-        col = vec3(min(idx / 3.0, 1.0), max(0.0, (idx - 3.0) / 4.0), max(0.0, (idx - 6.0)));
+        // 0: RGB
+        g_c0 = vec3(1.0, 0.0, 0.0);
+        g_c1 = vec3(0.0, 1.0, 0.0);
+        g_c2 = vec3(0.0, 0.0, 1.0);
     } else if (p < 2.0) {
-        col = vec3(max(0.0, (idx - 5.0) / 2.0), max(0.0, (idx - 2.0) / 5.0), min(idx / 3.0, 1.0));
+        // 1: Warm
+        g_c0 = vec3(1.0, 0.75, 0.0);
+        g_c1 = vec3(1.0, 0.25, 0.0);
+        g_c2 = vec3(0.57, 0.0, 0.0);
     } else if (p < 3.0) {
-        col = vec3(bit(val, 0.0), bit(val, 1.0), bit(val, 2.0));
+        // 2: Cool
+        g_c0 = vec3(0.43, 0.71, 1.0);
+        g_c1 = vec3(0.0, 0.29, 1.0);
+        g_c2 = vec3(0.0, 0.0, 0.57);
     } else if (p < 4.0) {
-        float v = idx / 7.0;
-        col = vec3(v * 0.2, v, v * 0.3);
+        // 3: Coral reef
+        g_c0 = vec3(0.0, 0.86, 0.71);
+        g_c1 = vec3(1.0, 0.43, 0.57);
+        g_c2 = vec3(0.14, 0.29, 0.57);
     } else if (p < 5.0) {
-        col = vec3(0.2 + idx / 9.0, max(0.0, (idx - 4.0) / 6.0), max(0.0, 0.8 - idx / 10.0));
+        // 4: Phosphor green
+        g_c0 = vec3(0.17, 0.86, 0.26);
+        g_c1 = vec3(0.11, 0.57, 0.17);
+        g_c2 = vec3(0.06, 0.29, 0.09);
     } else if (p < 6.0) {
-        col = vec3(1.0 - bit(val, 2.0), 1.0 - bit(val, 0.0), 1.0 - bit(val, 1.0));
+        // 5: Synthwave
+        g_c0 = vec3(0.86, 0.29, 0.14);
+        g_c1 = vec3(0.57, 0.0, 0.43);
+        g_c2 = vec3(0.43, 0.0, 0.57);
     } else if (p < 7.0) {
-        float v = idx / 7.0;
-        col = vec3(v, v * 0.6, v * 0.1);
+        // 6: Sunset
+        g_c0 = vec3(1.0, 0.71, 0.0);
+        g_c1 = vec3(0.86, 0.14, 0.14);
+        g_c2 = vec3(0.43, 0.0, 0.43);
     } else if (p < 8.0) {
-        col = vec3(bit(val, 0.0) * 0.9 + bit(val, 2.0) * 0.1, bit(val, 1.0) * 0.9 + bit(val, 2.0) * 0.1, bit(val, 2.0));
+        // 7: Neon
+        g_c0 = vec3(0.0, 1.0, 1.0);
+        g_c1 = vec3(1.0, 0.0, 0.71);
+        g_c2 = vec3(0.43, 0.0, 0.71);
     } else if (p < 9.0) {
-        col = vec3(smoothstep(2.0, 5.0, idx), smoothstep(5.0, 7.0, idx), smoothstep(0.0, 3.0, idx) - smoothstep(5.0, 7.0, idx));
+        // 8: Thermal
+        g_c0 = vec3(1.0, 0.86, 0.0);
+        g_c1 = vec3(1.0, 0.14, 0.29);
+        g_c2 = vec3(0.14, 0.0, 0.71);
     } else if (p < 10.0) {
-        col = vec3(max(0.0, (idx - 5.0) / 3.0), smoothstep(1.0, 6.0, idx), 0.15 + idx / 9.0);
+        // 9: Ocean
+        g_c0 = vec3(0.57, 0.86, 1.0);
+        g_c1 = vec3(0.0, 0.43, 0.71);
+        g_c2 = vec3(0.0, 0.14, 0.43);
     } else if (p < 11.0) {
-        float v = idx / 7.0;
-        col = vec3(v * 0.5, 0.2 + v * 0.6, v * 0.25);
+        // 10: Gameboy
+        g_c0 = vec3(0.43, 0.71, 0.21);
+        g_c1 = vec3(0.21, 0.43, 0.11);
+        g_c2 = vec3(0.07, 0.29, 0.04);
     } else if (p < 12.0) {
-        float v = idx / 7.0;
-        col = vec3(v);
+        // 11: Grayscale
+        g_c0 = vec3(1.0);
+        g_c1 = vec3(0.57);
+        g_c2 = vec3(0.29);
     } else if (p < 13.0) {
-        col = vec3(smoothstep(0.0, 3.0, idx) - smoothstep(4.0, 6.0, idx) + smoothstep(6.0, 7.0, idx), smoothstep(3.0, 6.0, idx), smoothstep(1.0, 4.0, idx));
+        // 12: CMY
+        g_c0 = vec3(0.0, 1.0, 1.0);
+        g_c1 = vec3(1.0, 0.0, 1.0);
+        g_c2 = vec3(1.0, 1.0, 0.0);
     } else if (p < 14.0) {
-        col = vec3(smoothstep(1.0, 4.0, idx), smoothstep(4.0, 7.0, idx) * 0.8, smoothstep(0.0, 2.0, idx) - smoothstep(3.0, 6.0, idx));
+        // 13: Amber
+        g_c0 = vec3(1.0, 0.71, 0.14);
+        g_c1 = vec3(0.71, 0.43, 0.07);
+        g_c2 = vec3(0.43, 0.21, 0.0);
     } else if (p < 15.0) {
-        float v = idx / 7.0;
-        col = vec3(0.15 + v * 0.7, 0.1 + v * 0.55, 0.05 + v * 0.35);
+        // 14: Sepia
+        g_c0 = vec3(0.86, 0.71, 0.43);
+        g_c1 = vec3(0.57, 0.43, 0.21);
+        g_c2 = vec3(0.29, 0.21, 0.11);
     } else {
-        col = vec3(0.4 + bit(val, 0.0) * 0.4 + bit(val, 2.0) * 0.2, 0.4 + bit(val, 1.0) * 0.4 + bit(val, 0.0) * 0.2, 0.4 + bit(val, 2.0) * 0.4 + bit(val, 1.0) * 0.2);
+        // 15: Pastel
+        g_c0 = vec3(1.0, 0.71, 0.86);
+        g_c1 = vec3(0.71, 0.86, 1.0);
+        g_c2 = vec3(0.86, 1.0, 0.71);
     }
-
-    return floor(col * 7.0 + 0.5) / 7.0;
 }
 
 void main(void) {
@@ -120,15 +156,14 @@ void main(void) {
     float a1 = step(0.5, smoothstep(threshold, threshold + softness, n1));
     float a2 = step(0.5, smoothstep(threshold, threshold + softness, n2));
 
-    // Priority compositing: layer 0 (highest) → layer 1 → layer 2
-    // Three colors from the palette: indices 6, 4, 2 (spread across 0-7 range)
-    // Priority: 6 > 4 > 2
-    vec3 col = vec3(0.0); // background: black (palette index 0)
+    // Compute palette colors once
+    calcColors(u_x2);
 
-    // Lowest priority first, overwritten by higher
-    if (a2 > 0.5) col = palette(2.0 / 7.0, u_x2);
-    if (a1 > 0.5) col = palette(4.0 / 7.0, u_x2);
-    if (a0 > 0.5) col = palette(6.0 / 7.0, u_x2);
+    // Priority compositing: layer 0 (highest) → layer 1 → layer 2
+    vec3 col = vec3(0.0);
+    if (a2 > 0.5) col = g_c2;
+    if (a1 > 0.5) col = g_c1;
+    if (a0 > 0.5) col = g_c0;
 
     gl_FragColor = vec4(col, 1.0);
 }
