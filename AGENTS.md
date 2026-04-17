@@ -9,7 +9,7 @@ GLSL shader sandbox for developing shaders for the [recurBOY](https://github.com
 - `server.js` — Node.js HTTP server with SSE file watching for hot reload
 - `index.html` — WebGL canvas, shader selector sidebar (grouped by directory), param sliders
 - `shaders/sandbox/` — full-featured shaders for desktop WebGL preview
-- `shaders/recurboy/` — simplified `_lite` shaders that run on recurBOY's Pi GPU
+- `shaders/recurboy/` — simplified shaders that run on recurBOY's Pi GPU
 - `recurboy_header.glsl` — prepended during build; maps recurBOY uniforms to our names via `#define`
 - `build/` — generated `.frag` files for deployment (gitignored)
 
@@ -25,17 +25,16 @@ uniform float u_x0, u_x1, u_x2, u_x3;  // params 0.0-1.0
 
 - `u_x3` is the **speed/animation knob** — always assign speed to this param
 - In the sandbox, `u_x3` is bipolar (-1.0 to 1.0); on the recurBOY hardware, `fparams` is **0.0 to 1.0**
-- For `_lite` shaders, always add a base offset to speed so animation runs even when the knob is at minimum (e.g. `float speed = 0.3 + u_x3 * 1.5;` not `float speed = u_x3 * 1.5;`)
+- For recurBOY shaders, always add a base offset to speed so animation runs even when the knob is at minimum (e.g. `float speed = 0.3 + u_x3 * 1.5;` not `float speed = u_x3 * 1.5;`)
 
 - `horiz_` prefix: standard landscape orientation
 - `vert_` prefix: rotated 90 degrees (UV swapped, aspect inverted, scanlines on x instead of y)
 - `_bit` suffix: 1-bit Bayer dithered variant with ink/paper color pairs
 - `_wet` suffix: water surface variant (sandbox only, too heavy for Pi)
-- `_lite` suffix: recurBOY-compatible (lives in `shaders/recurboy/`)
 
 ## recurBOY Pi GPU constraints
 
-The VideoCore IV GPU is extremely limited. The `_lite` shaders must follow these rules:
+The VideoCore IV GPU is extremely limited. Shaders in `shaders/recurboy/` must follow these rules:
 
 - **No `bool` type** — use `float` with 0.0/1.0 and comparisons like `> 0.5`
 - **No `break` statements** — use guard flags (`if (hit < 0.5) { ... }`)

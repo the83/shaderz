@@ -58,12 +58,13 @@ Shaders are organized into two directories:
 
 | File | Description |
 |---|---|
-| `horiz_ballblazer_lite.glsl` | Checkered floor, sky, 4 spheres, camera sway |
-| `horiz_ballblazer_bit_lite.glsl` | Ballblazer lite with 1-bit dithering |
-| `horiz_phantasy_lite.glsl` | Dungeon raycaster with fake navigation |
-| `horiz_phantasy_bit_lite.glsl` | Phantasy lite with 1-bit dithering |
-| `horiz_fortress_lite.glsl` | LZX Fortress clone — 6 logic modes, 8 color palettes, FM + cross-modulation |
-| `horiz_cube_lite.glsl` | Rotating 3D cube — per-axis rotation, analytical intersection, no loops |
+| `horiz_ballblazer.glsl` | Checkered floor, sky, 4 spheres, camera sway |
+| `horiz_ballblazer_bit.glsl` | Ballblazer with 1-bit dithering |
+| `horiz_phantasy.glsl` | Dungeon raycaster with fake navigation |
+| `horiz_phantasy_bit.glsl` | Phantasy with 1-bit dithering |
+| `horiz_fortress.glsl` | LZX Fortress clone — 6 logic modes, 8 color palettes, FM + cross-modulation |
+| `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation, analytical intersection, no loops |
+| `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
 | `vert_*` | Rotated 90° versions of the above |
 
 ## Adding shaders
@@ -92,4 +93,4 @@ To avoid entering the Pi's password on every deploy, copy your SSH key:
 ssh-copy-id pi@raspberrypi.local
 ```
 
-**Note:** The recurBOY's GLSL ES compiler does not support `bool`, `inout`, or `break`. The `_lite` shader variants are simplified for the Pi's GPU (shorter loops, no unsupported features).
+**Note:** The recurBOY's GLSL ES compiler does not support `bool`, `inout`, or `break`. The `shaders/recurboy/` shaders are simplified for the Pi's GPU (shorter loops, no unsupported features).
