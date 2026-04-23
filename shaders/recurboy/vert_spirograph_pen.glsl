@@ -90,7 +90,7 @@ void main(void) {
 
     float aspect = u_resolution.y / u_resolution.x;
     float maxR = a + d;
-    vec2 pos = (uv - 0.5) * 2.0 * maxR * 1.15;
+    vec2 pos = (uv - 0.5) * 2.0 * maxR * 1.6;
     pos.x *= aspect;
 
     float ct = cos(t);
