@@ -83,6 +83,7 @@ Shaders are organized into two directories:
 | `horiz_sierpinski.glsl` | Sierpiński triangle — branchless subdivision, tiled kaleidoscope, no trig in loop |
 | `horiz_sphere_spiral.glsl` | Spherical spiral — loxodrome on rotating sphere, front/back face rendering |
 | `horiz_doyle.glsl` | Doyle spiral — log-polar circle packing, 4 unrolled cell checks, no loop |
+| `horiz_brakhage.glsl` | Brakhage — layered paint swirls with randomized warp, palette refresh, no FBM |
 | `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ## Adding shaders

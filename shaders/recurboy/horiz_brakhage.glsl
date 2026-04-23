@@ -86,7 +86,7 @@ void main(void) {
     float ra6 = 0.3 + hash(vec2(seed, 15.0)) * 0.6;
     float ra7 = 0.3 + hash(vec2(seed, 16.0)) * 0.6;
 
-    float scale = mix(3.0, 12.0, u_x0);
+    float scale = mix(1.0, 24.0, u_x0);
     vec2 st = vec2(uv.x * aspect, uv.y) * scale;
 
     // === Layer 1: large swirl shapes ===
