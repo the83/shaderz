@@ -60,6 +60,8 @@ Shaders are organized into two directories:
 | `horiz_spirograph_pen.glsl` | Spirograph pen — analytical pen-line hypotrochoid using law-of-cosines decomposition |
 | `horiz_lissajous.glsl` | Lissajous figures — analytical arcsin-based rendering, a/b frequency control |
 | `horiz_sierpinski.glsl` | Sierpiński triangle — iterated subdivision with tiled kaleidoscope mirroring |
+| `horiz_sphere_spiral.glsl` | Spherical spiral — loxodrome on a rotating sphere, analytical θ≈a·φ check |
+| `horiz_doyle.glsl` | Doyle spiral — circle packing via log-polar grid, no loop |
 
 ### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
 
@@ -79,6 +81,8 @@ Shaders are organized into two directories:
 | `horiz_spirograph_pen.glsl` | Spirograph pen — analytical pen-line rendering, no sample loop |
 | `horiz_lissajous.glsl` | Lissajous figures — analytical arcsin-based rendering, 8-branch check |
 | `horiz_sierpinski.glsl` | Sierpiński triangle — branchless subdivision, tiled kaleidoscope, no trig in loop |
+| `horiz_sphere_spiral.glsl` | Spherical spiral — loxodrome on rotating sphere, front/back face rendering |
+| `horiz_doyle.glsl` | Doyle spiral — log-polar circle packing, 4 unrolled cell checks, no loop |
 | `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ## Adding shaders
