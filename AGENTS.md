@@ -39,16 +39,15 @@ The VideoCore IV GPU is extremely limited. Shaders in `shaders/recurboy/` must f
 - **No `bool` type** — use `float` with 0.0/1.0 and comparisons like `> 0.5`
 - **No `break` statements** — use guard flags (`if (hit < 0.5) { ... }`)
 - **No `inout` parameters** — use global variables instead
+- **No `transpose()`** — GLSL ES 1.0 only; write manual helpers if needed
 - **No division by zero** — clamp ray directions: `abs(x) < 0.001 ? 0.001 : x`
-- **No per-pixel navigation loops** — even 10 iterations with `isWall()` freezes the GPU. Use fake camera paths (hash-based, no wall checking)
-- **Max 4 `checkCell` calls** for object intersection (6 causes black screen)
-- **No boxes or pyramids** — only sphere intersection is cheap enough
-- **No sphere animation** — even one extra `sin()` per sphere is too much
-- **`mediump float` precision** — wrap large coordinates with `mod()` to stay small
+- **No cross-iteration state accumulation** — incremental rotation (mutating 4+ variables across loop iterations) causes black screen. Use direct cos/sin per iteration instead
+- **No raymarching** — even 6 steps × 2 torus SDFs is too heavy. Avoid raymarched 3D entirely
+- **Max ~12 loop iterations** — keep loop bodies simple (multiply-add, step, basic math). Trig calls inside loops are expensive; precompute outside when possible
+- **Analytical per-pixel approaches work best** — spirograph pen (law-of-cosines), Lissajous (arcsin branches), and Sierpiński (iterated subdivision) all run well because they solve the curve equation per-pixel with minimal trig
+- **`mediump float` precision** — wrap large coordinates with `mod()` to stay small. Values near 1.0 have precision ~0.001
 - **Y-axis is inverted** — use `u_resolution.y - gl_FragCoord.y`
-- **Params at 0 cause blank screens** — use `mix(0.05, 0.95, param)` or ensure defaults are visible
 - **Files must be synced** — `ssh pi 'sync'` after `scp` or files are lost on power cycle
-- **Overwriting existing files may fail silently** — use new filenames when iterating
 
 ## Build and deploy
 

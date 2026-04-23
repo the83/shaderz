@@ -49,15 +49,17 @@ Shaders are organized into two directories:
 | `horiz_ballblazer_bit.glsl` | Ballblazer with 1-bit Bayer dithering and ink/paper color pairs |
 | `horiz_ballblazer_wet.glsl` | Ballblazer with animated water surface and Fresnel reflections |
 | `horiz_phantasy.glsl` | Phantasy Star–style dungeon raycaster with brick-textured walls/floor/ceiling |
-| `horiz_phantasy_bit.glsl` | Phantasy dungeon with 1-bit Bayer dithering and ink/paper color pairs |
-| `horiz_fortress.glsl` | LZX Fortress clone — 3-bit digital pattern generator with 8 logic combinator modes and 16 color palettes |
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation control, colored faces, analytical ray-box intersection |
 | `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
 | `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
 | `horiz_color_noise.glsl` | Chromatic noise — independent RGB channels with color fringing and VHS-style interference |
 | `horiz_palette_noise.glsl` | Palette noise — 3 layered noise channels with priority compositing, 16 palettes (RGB first) |
 | `horiz_triangle_noise.glsl` | Triangle noise — rotated grid layers (0°/60°/-60°) with priority compositing, 16 palettes |
-| `vert_*` | Rotated 90° versions of the above (where applicable) |
+| `horiz_julia.glsl` | Julia set fractal — animated c-parameter orbit with 13 palettes, bipolar speed |
+| `horiz_spirograph.glsl` | Spirograph — glowing hypotrochoid curves, additive distance field rendering |
+| `horiz_spirograph_pen.glsl` | Spirograph pen — analytical pen-line hypotrochoid using law-of-cosines decomposition |
+| `horiz_lissajous.glsl` | Lissajous figures — analytical arcsin-based rendering, a/b frequency control |
+| `horiz_sierpinski.glsl` | Sierpiński triangle — iterated subdivision with tiled kaleidoscope mirroring |
 
 ### `shaders/recurboy/` — simplified shaders for recurBOY (Pi GPU)
 
@@ -66,14 +68,17 @@ Shaders are organized into two directories:
 | `horiz_ballblazer.glsl` | Checkered floor, sky, 4 spheres, camera sway |
 | `horiz_ballblazer_bit.glsl` | Ballblazer with 1-bit dithering |
 | `horiz_phantasy.glsl` | Dungeon raycaster with fake navigation |
-| `horiz_phantasy_bit.glsl` | Phantasy with 1-bit dithering |
-| `horiz_fortress.glsl` | LZX Fortress clone — 16 color palettes, 6 logic modes, FM + cross-modulation |
 | `horiz_cube.glsl` | Rotating 3D cube — per-axis rotation, analytical intersection, no loops |
 | `horiz_cube_outline.glsl` | Rotating 3D cube — white faces, black outlines |
 | `horiz_pixel_noise.glsl` | Filtered noise texture — H/V coherence control, density from starfield to snow |
 | `horiz_color_noise.glsl` | Chromatic noise — independent RGB channels with color fringing |
 | `horiz_palette_noise.glsl` | Palette noise — 3 layered noise channels with priority compositing, 8 palettes (RGB first) |
 | `horiz_triangle_noise.glsl` | Triangle noise — rotated grid layers with priority compositing, 8 palettes |
+| `horiz_julia.glsl` | Julia set fractal — 24-iteration escape-time with Lissajous c-orbit, 13 palettes |
+| `horiz_spirograph.glsl` | Spirograph — glowing hypotrochoid via 12-point additive distance field |
+| `horiz_spirograph_pen.glsl` | Spirograph pen — analytical pen-line rendering, no sample loop |
+| `horiz_lissajous.glsl` | Lissajous figures — analytical arcsin-based rendering, 8-branch check |
+| `horiz_sierpinski.glsl` | Sierpiński triangle — branchless subdivision, tiled kaleidoscope, no trig in loop |
 | `vert_*` | Rotated 90° versions of the above (where applicable) |
 
 ## Adding shaders
