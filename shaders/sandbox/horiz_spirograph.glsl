@@ -102,7 +102,7 @@ void main(void) {
     float R = 1.0;
     float r = R / k;
     float a = R - r;
-    float d = mix(0.3, 1.3, u_x1) * r;
+    float d = mix(0.1, 0.95, u_x1) * a;
 
     // Map pixel to centered coords scaled to fit the curve
     float aspect = u_resolution.x / u_resolution.y;
